@@ -45,7 +45,7 @@
     };
 
     var getWords = function () {
-      return $('input.word').toArray().map(wordEl => wordEl.value.toLowerCase()).filter(word => word);
+      return $('input.word').toArray().map(wordEl => wordEl.value.toUpperCase()).filter(word => word);
     };
 
     /**
@@ -286,20 +286,71 @@
             y = solution[i].y,
             next = wordfind.orientations[orientation];
 
-        var wordEl = $('input.word[value="' + word + '"]');
-        if (!wordEl.hasClass('wordFound')) {
-          for (var j = 0, size = word.length; j < size; j++) {
-            var nextPos = next(x, y, j);
-            $('[x="' + nextPos.x + '"][y="' + nextPos.y + '"]').addClass('solved');
-          }
-
-          wordEl.addClass('wordFound');
+        var direction = wordfind.orientation2direction[orientation]
+        for (var j = 0, size = word.length; j < size; j++) {
+          var pos = next(x, y, j);
+          $('[x="' + pos.x + '"][y="' + pos.y + '"]').addClass('solved').addClass(direction);
         }
+        var wordEl = $('input.word[value="' + word + '"]');
+        wordEl.addClass('wordFound');
       }
     };
 
     this.addedLettersCount = function () {
       return lettersAddedCount;
+    };
+
+    this.downloadSvgGrid = function () {
+        var width = 100;
+        var height = 100;
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute('viewBox', `0 0 ${this.puzzle[0].length * width} ${this.puzzle.length * height}`);
+        svg.setAttribute('font-family', 'Helvetica');
+        svg.setAttribute('font-size', 75);
+        svg.setAttribute('stroke', 'black');
+        // for each row in the puzzle
+        for (var i = 0; i < this.puzzle.length; i++) {
+            // append a div to represent a row in the puzzle
+            var row = this.puzzle[i];
+            // for each element in that row
+            for (var j = 0; j < row.length; j++) {
+                var group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                group.setAttribute('transform', `translate(${j * width}, ${i * width})`)
+                var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute('width', width);
+                rect.setAttribute('height', height);
+                rect.setAttribute('fill', 'none');
+                group.appendChild(rect);
+                var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.textContent = row[j];
+                text.setAttribute('x', 25);
+                text.setAttribute('y', 75);
+                group.appendChild(text);
+                svg.appendChild(group);
+            }
+        }
+        const svgData = (new XMLSerializer()).serializeToString(svg);
+
+        // Create a new Blob object with the JSON data and set its type
+        var blob = new Blob([svgData], {type : 'image/svg+xml'});
+
+        // Create a temporary URL for the file
+        var url = URL.createObjectURL(blob);
+
+        // Create a new link element with the download attribute set to the desired filename
+        var link = document.createElement('a');
+        link.setAttribute('download', 'wordfind-grid.xml');
+
+        // Set the link's href attribute to the temporary URL
+        link.href = url;
+
+        // Simulate a click on the link to trigger the download
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up the temporary URL and link element
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
   };
 
@@ -309,7 +360,7 @@
     return allSquares.length - allSquares.filter(b => b.textContent.trim()).length;
   };
   WordFindGame.insertWord = function (wordsList, word) {
-    wordsList.append($('<li><input class="word" value="' + (word || '') + '"></li>'));
+    wordsList.append($('<li><input class="word" value="' + (word.toUpperCase() || '') + '"></li>'));
   };
 
 

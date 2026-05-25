@@ -14,8 +14,10 @@
         <div id="words-editor">
             <p>List of hidden words</p>
             <ul id="words"></ul>
-            <button id="add-word">Add word</button>
-            <button id="remove-last-word">Remove last word</button>
+            <div>
+                <button onclick="WordFindGame.insertWord($('#words'))">Add word</button>
+                <button onclick="$('#words').children().last().remove()">Remove last word</button>
+            </div>
         </div>
         <fieldset id="controls">
             <label for="allowed-missing-words">Allowed missing words :
@@ -25,7 +27,7 @@
                 <input id="max-grid-growth" type="number" min="0" max="5" step="1" value="0">
             </label>
             <label for="max-attemps-per-grid-and-wordset">Max attemps per grid &amp; wordset :
-                <input id="max-attemps-per-grid-and-wordset" type="number" min="1" max="500" step="1" value="100">
+                <input id="max-attemps-per-grid-and-wordset" type="number" min="1" max="999" step="1" value="100">
             </label>
             <label for="prefer-letter-overlaps">Prefer letter overlap :
                 <input id="prefer-letter-overlaps" type="checkbox" checked>
@@ -47,9 +49,11 @@
             <label for="secret-word">Secret word:
                 <input id="secret-word">
             </label>
-            <button id="create-grid">Create grid</button>
+            <br><br>
+            <button type="submit" onclick="recreateGrid()">Recreate grid</button>
             <p id="result-message"></p>
-            <button id="solve">Solve Puzzle</button>
+            <button type="submit" onclick="game.solve()">Solve Puzzle</button>
+            <button type="submit" onclick="game.downloadSvgGrid()">Download grid as SVG image</button>
         </fieldset>
     </div>
 
@@ -88,9 +92,8 @@
     $('#secret-word').val('LAETITIA');
 
     /* Init */
-    function recreate() {
+    window.recreateGrid = function() {
         $('#puzzle').children().remove();
-        $('#result-message').removeClass();
         var fillBlanks, game;
         if ($('#filling-letters').val() === 'none') {
             fillBlanks = false;
@@ -120,22 +123,15 @@
         }
         var emptySquaresCount = WordFindGame.emptySquaresCount();
         if (emptySquaresCount) {
-            resultMsg += ` but there are ${emptySquaresCount} empty squares`
+            resultMsg += ` with ${emptySquaresCount} empty squares`
         }
         $('#result-message').text(resultMsg).css({color: ''});
         window.game = game;
     }
-    recreate();
+    recreateGrid();
 
     /* Event listeners */
     $('#filling-letters').change((evt) => $('#secret-word').prop('disabled', !evt.target.value.startsWith('secret-word')));
-
-    $('#remove-last-word').click( () => $('#words').children().last().remove());
-    $('#add-word').click( () => WordFindGame.insertWord($('#words')));
-
-    $('#create-grid').click(recreate);
-
-    $('#solve').click(() => game.solve());
     </script>
 </body>
 </html>

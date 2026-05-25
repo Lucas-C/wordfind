@@ -46,19 +46,30 @@
 
     // The list of all the possible orientations
     var allOrientations = ['horizontal','horizontalBack','vertical','verticalUp',
-                           'diagonal','diagonalUp','diagonalBack','diagonalUpBack'];
+                           'diagonalDown','diagonalDownBack','diagonalUp','diagonalUpBack'];
+
+    var orientation2direction = {
+      'horizontal': 'horizontal',
+      'horizontalBack': 'horizontal',
+      'vertical': 'vertical',
+      'verticalUp': 'vertical',
+      'diagonalDown': 'diagonalDown',
+      'diagonalDownBack': 'diagonalDown',
+      'diagonalUp': 'diagonalUp',
+      'diagonalUpBack': 'diagonalUp',
+    };
 
     // The definition of the orientation, calculates the next square given a
     // starting square (x,y) and distance (i) from that square.
     var orientations = {
-      horizontal:     function(x,y,i) { return {x: x+i, y: y  }; },
-      horizontalBack: function(x,y,i) { return {x: x-i, y: y  }; },
-      vertical:       function(x,y,i) { return {x: x,   y: y+i}; },
-      verticalUp:     function(x,y,i) { return {x: x,   y: y-i}; },
-      diagonal:       function(x,y,i) { return {x: x+i, y: y+i}; },
-      diagonalBack:   function(x,y,i) { return {x: x-i, y: y+i}; },
-      diagonalUp:     function(x,y,i) { return {x: x+i, y: y-i}; },
-      diagonalUpBack: function(x,y,i) { return {x: x-i, y: y-i}; }
+      horizontal:       function(x,y,i) { return {x: x+i, y: y  }; },
+      horizontalBack:   function(x,y,i) { return {x: x-i, y: y  }; },
+      vertical:         function(x,y,i) { return {x: x,   y: y+i}; },
+      verticalUp:       function(x,y,i) { return {x: x,   y: y-i}; },
+      diagonalDown:     function(x,y,i) { return {x: x+i, y: y+i}; },
+      diagonalDownBack: function(x,y,i) { return {x: x-i, y: y-i}; },
+      diagonalUp:       function(x,y,i) { return {x: x+i, y: y-i}; },
+      diagonalUpBack:   function(x,y,i) { return {x: x-i, y: y+i}; }
     };
 
     // Determines if an orientation is possible given the starting square (x,y),
@@ -66,14 +77,14 @@
     // Returns true if the word will fit starting at the square provided using
     // the specified orientation.
     var checkOrientations = {
-      horizontal:     function(x,y,h,w,l) { return w >= x + l; },
-      horizontalBack: function(x,y,h,w,l) { return x + 1 >= l; },
-      vertical:       function(x,y,h,w,l) { return h >= y + l; },
-      verticalUp:     function(x,y,h,w,l) { return y + 1 >= l; },
-      diagonal:       function(x,y,h,w,l) { return (w >= x + l) && (h >= y + l); },
-      diagonalBack:   function(x,y,h,w,l) { return (x + 1 >= l) && (h >= y + l); },
-      diagonalUp:     function(x,y,h,w,l) { return (w >= x + l) && (y + 1 >= l); },
-      diagonalUpBack: function(x,y,h,w,l) { return (x + 1 >= l) && (y + 1 >= l); }
+      horizontal:       function(x,y,h,w,l) { return w >= x + l; },
+      horizontalBack:   function(x,y,h,w,l) { return x + 1 >= l; },
+      vertical:         function(x,y,h,w,l) { return h >= y + l; },
+      verticalUp:       function(x,y,h,w,l) { return y + 1 >= l; },
+      diagonalDown:     function(x,y,h,w,l) { return (w >= x + l) && (h >= y + l); },
+      diagonalDownBack: function(x,y,h,w,l) { return (x + 1 >= l) && (y + 1 >= l); },
+      diagonalUp:       function(x,y,h,w,l) { return (w >= x + l) && (y + 1 >= l); },
+      diagonalUpBack:   function(x,y,h,w,l) { return (x + 1 >= l) && (h >= y + l); }
     };
 
     // Determines the next possible valid square given the square (x,y) was ]
@@ -81,14 +92,14 @@
     // squares that must be checked. Returning {x: x+1, y: y} will always work
     // but will not be optimal.
     var skipOrientations = {
-      horizontal:     function(x,y,l) { return {x: 0,   y: y+1  }; },
-      horizontalBack: function(x,y,l) { return {x: l-1, y: y    }; },
-      vertical:       function(x,y,l) { return {x: 0,   y: y+100}; },
-      verticalUp:     function(x,y,l) { return {x: 0,   y: l-1  }; },
-      diagonal:       function(x,y,l) { return {x: 0,   y: y+1  }; },
-      diagonalBack:   function(x,y,l) { return {x: l-1, y: x>=l-1?y+1:y    }; },
-      diagonalUp:     function(x,y,l) { return {x: 0,   y: y<l-1?l-1:y+1  }; },
-      diagonalUpBack: function(x,y,l) { return {x: l-1, y: x>=l-1?y+1:y  }; }
+      horizontal:       function(x,y,l) { return {x: 0,   y: y+1  }; },
+      horizontalBack:   function(x,y,l) { return {x: l-1, y: y    }; },
+      vertical:         function(x,y,l) { return {x: 0,   y: y+100}; },
+      verticalUp:       function(x,y,l) { return {x: 0,   y: l-1  }; },
+      diagonalDown:     function(x,y,l) { return {x: 0,   y: y+1  }; },
+      diagonalDownBack: function(x,y,l) { return {x: l-1, y: x>=l-1?y+1:y  }; },
+      diagonalUp:       function(x,y,l) { return {x: 0,   y: y<l-1?l-1:y+1  }; },
+      diagonalUpBack:   function(x,y,l) { return {x: l-1, y: x>=l-1?y+1:y    }; }
     };
 
     /**
@@ -314,6 +325,8 @@
       */
       orientations: orientations,
 
+      orientation2direction: orientation2direction,
+
       /**
       * Generates a new word find (word search) puzzle.
       *
@@ -373,7 +386,7 @@
                 if (typeof options.fillBlanks === 'function') {
                   extraLetterGenerator = options.fillBlanks;
                 } else if (typeof options.fillBlanks === 'string') {
-                  lettersToAdd = options.fillBlanks.toLowerCase().split('');
+                  lettersToAdd = options.fillBlanks.toUpperCase().split('');
                   extraLetterGenerator = () => lettersToAdd.pop() || (fillingBlanksCount++ && '');
                 } else {
                   extraLetterGenerator = () => LETTERS[Math.floor(Math.random() * LETTERS.length)];

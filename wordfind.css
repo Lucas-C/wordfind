@@ -80,7 +80,50 @@ button::-moz-focus-inner {
 #puzzle .solved {
   background-color: purple;
   color: white;
+  position: relative; /* ro relatively position pseudo-elements below */
 }
+#puzzle .solved.horizontal::before,
+#puzzle .solved.vertical::after {
+  content: '';
+  display: block;
+  width: 3.5rem;
+  height: 3.5rem;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+#puzzle .solved.horizontal::before {
+  background-image: url('data:image/svg+xml,\
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100% 100%">\
+      <rect x="0" y="45%" width="100%" height="4px" fill="black"/>\
+    </svg>');
+}
+#puzzle .solved.vertical::after {
+  background-image: url('data:image/svg+xml,\
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100% 100%">\
+      <rect x="45%" y="0" width="4px" height="100%" fill="black"/>\
+    </svg>');
+}
+#puzzle .solved.diagonalDown {
+  background-image: url('data:image/svg+xml,\
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100% 100%">\
+      <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" stroke-width="4"/>\
+    </svg>');
+}
+#puzzle .solved.diagonalUp {
+  background-image: url('data:image/svg+xml,\
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100% 100%">\
+      <line x1="0" y1="100%" x2="100%" y2="0" stroke="black" stroke-width="4"/>\
+    </svg>');
+}
+#puzzle .solved.diagonalDown.diagonalUp {
+  background-image: url('data:image/svg+xml,\
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100% 100%">\
+      <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" stroke-width="4"/>\
+      <line x1="0" y1="100%" x2="100%" y2="0" stroke="black" stroke-width="4"/>\
+    </svg>');
+}
+
 
 /* indicates that all words have been found */
 #puzzle .complete {
@@ -149,16 +192,13 @@ select {
 select {
   max-width: 10rem;
 }
-#create-grid, #solve {
-  display: block;
-  margin-top: 1rem;
-}
 #secret-word {
   text-transform: uppercase;
 }
 
 #result-message {
   font-size: 1.2em;
+  margin: 1rem;
 }
 
 footer { text-align: center; padding: 1rem; }
