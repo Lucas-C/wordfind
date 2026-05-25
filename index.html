@@ -12,6 +12,7 @@
     <div id="main" role="main">
         <div id="puzzle"></div>
         <div id="words-editor">
+            <p>List of hidden words</p>
             <ul id="words"></ul>
             <button id="add-word">Add word</button>
             <button id="remove-last-word">Remove last word</button>
@@ -37,7 +38,13 @@
                     <option value="random">random</option>
                 </select>
             </label>
-            <label for="secret-word">Secret word :
+            <label for="max-fillings">Max filling blanks/letters:
+                <input id="max-fillings" type="number" min="1" max="100" step="1" value="30">
+            </label>
+            <label for="color-filling-letters">Color filling letters:
+                <input id="color-filling-letters" type="checkbox" checked>
+            </label>
+            <label for="secret-word">Secret word:
                 <input id="secret-word">
             </label>
             <button id="create-grid">Create grid</button>
@@ -45,6 +52,10 @@
             <button id="solve">Solve Puzzle</button>
         </fieldset>
     </div>
+
+    <footer>
+        Source code: <a href="https://github.com/Lucas-C/wordfind">github.com/Lucas-C/wordfind</a>
+    </footer>
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
     <script type="text/javascript" src="wordfind.js"></script> 
@@ -91,7 +102,9 @@
                 allowedMissingWords: +$('#allowed-missing-words').val(),
                 maxGridGrowth: +$('#max-grid-growth').val(),
                 fillBlanks: fillBlanks,
+                maxFillings: +$('#max-fillings').val(),
                 allowExtraBlanks: ['none', 'secret-word-plus-blanks'].includes($('#filling-letters').val()),
+                colorFillingLetters: $('#color-filling-letters').val() == 'on',
                 maxAttempts: +$('#max-attemps-per-grid-and-wordset').val(),
                 preferOverlap: $('#prefer-letter-overlaps').val() == 'on'
             });
@@ -100,8 +113,16 @@
             return;
         }
         wordfind.print(game.puzzle);
+        var resultMsg = `😃`
+        var addedLettersCount = game.addedLettersCount();
+        if (addedLettersCount) {
+            resultMsg += ` with ${addedLettersCount} letters added`
+        }
         var emptySquaresCount = WordFindGame.emptySquaresCount();
-        $('#result-message').text(`😃 ${emptySquaresCount ? 'but there are empty squares' : ''}`).css({color: ''});
+        if (emptySquaresCount) {
+            resultMsg += ` but there are ${emptySquaresCount} empty squares`
+        }
+        $('#result-message').text(resultMsg).css({color: ''});
         window.game = game;
     }
     recreate();

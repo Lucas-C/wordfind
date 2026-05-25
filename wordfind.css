@@ -61,6 +61,11 @@ button::-moz-focus-inner {
   border: 0;
 }
 
+/* indicates extra letters added */
+#puzzle .extra {
+  background-color: #fac;
+}
+
 /* indicates when a square has been selected */
 #puzzle .selected {
   background-color: orange;
@@ -155,3 +160,5 @@ select {
 #result-message {
   font-size: 1.2em;
 }
+
+footer { text-align: center; padding: 1rem; }

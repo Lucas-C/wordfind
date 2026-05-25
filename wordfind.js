@@ -337,7 +337,7 @@
         if (!words.length) {
           throw new Error('Zero words provided');
         }
-        var wordList, puzzle, attempts = 0, gridGrowths = 0, opts = settings || {};
+        var wordList, puzzle, lettersAdded, attempts = 0, gridGrowths = 0, opts = settings || {};
 
         // copy and sort the words by length, inserting words into the puzzle
         // from longest to shortest works out the best
@@ -350,6 +350,7 @@
           width:                opts.width || maxWordLength,
           orientations:         opts.orientations || allOrientations,
           fillBlanks:           opts.fillBlanks !== undefined ? opts.fillBlanks : true,
+          maxFillings:          opts.maxFillings,
           allowExtraBlanks:     opts.allowExtraBlanks !== undefined ? opts.allowExtraBlanks : true,
           maxAttempts:          opts.maxAttempts || 3,
           maxGridGrowth:        opts.maxGridGrowth !== undefined ? opts.maxGridGrowth : 10,
@@ -365,6 +366,7 @@
             try {
               var wordsNotIncluded = [];
               puzzle = fillPuzzle(wordList, options, wordsNotIncluded);
+              lettersAdded = []
               // fill in empty spaces with random letters
               if (options.fillBlanks) {
                 var lettersToAdd, fillingBlanksCount = 0, extraLetterGenerator;
@@ -376,17 +378,27 @@
                 } else {
                   extraLetterGenerator = () => LETTERS[Math.floor(Math.random() * LETTERS.length)];
                 }
-                var extraLettersCount = this.fillBlanks({puzzle, extraLetterGenerator: extraLetterGenerator});
+                lettersAdded = this.fillBlanks({puzzle, extraLetterGenerator: extraLetterGenerator});
                 if (lettersToAdd && lettersToAdd.length) {
                   throw new Error(`Some extra letters provided were not used: ${lettersToAdd}`);
                 }
                 if (lettersToAdd && fillingBlanksCount && !options.allowExtraBlanks) {
                   throw new Error(`${fillingBlanksCount} extra letters were missing to fill the grid`);
                 }
-                var gridFillPercent = 100 * (1 - extraLettersCount / (options.width * options.height));
-                console.log(`Final grid filled at ${gridFillPercent.toFixed(0)}% - Blanks filled with ${extraLettersCount} letters`);
+                if (options.maxFillings && lettersAdded.length > options.maxFillings) {
+                  throw new Error(`Too many extra letters (${lettersAdded.length}) added to fill the grid`);
+                }
+                var gridFillPercent = 100 * (1 - lettersAdded.length / (options.width * options.height));
+                console.log(`Final grid filled at ${gridFillPercent.toFixed(0)}% - Blanks filled with ${lettersAdded.length} letters: ${lettersAdded.map(a => a.letter).toSorted().join('').toUpperCase()}`);
+              } else {
+                var blanksCount = this.countBlanks(puzzle)
+                if (options.maxFillings && blanksCount > options.maxFillings) {
+                  throw new Error(`Too many blanks (${blanksCount}) in the grid`);
+                }
+                var gridFillPercent = 100 * (1 - blanksCount / (options.width * options.height));
+                console.log(`Final grid filled at ${gridFillPercent.toFixed(0)}% with ${blanksCount} blanks`);
               }
-            } catch (e) {
+            } catch (error) {
                 if (attempts > options.maxAttempts) {
                   throw e;
                 }
@@ -406,11 +418,14 @@
           }
         }
 
-        if (wordsNotIncluded) {
+        if (wordsNotIncluded.length) {
             console.log('Words not included:', wordsNotIncluded.join(', '));
         }
 
-        return puzzle;
+        return {
+          grid: puzzle,
+          lettersAdded: lettersAdded
+        }
       },
 
       /**
@@ -420,17 +435,34 @@
       * @api public
       */
       fillBlanks: function ({puzzle, extraLetterGenerator}) {
-        var extraLettersCount = 0;
+        var lettersAdded = [];
         for (var i = 0, height = puzzle.length; i < height; i++) {
           var row = puzzle[i];
           for (var j = 0, width = row.length; j < width; j++) {
             if (!puzzle[i][j]) {
               puzzle[i][j] = extraLetterGenerator();
-              extraLettersCount++;
+              lettersAdded.push({
+                i: i,
+                j: j,
+                letter: puzzle[i][j]
+              })
             }
           }
         }
-        return extraLettersCount;
+        return lettersAdded;
+      },
+
+      countBlanks: function (puzzle) {
+        var count = 0;
+        for (var i = 0, height = puzzle.length; i < height; i++) {
+          var row = puzzle[i];
+          for (var j = 0, width = row.length; j < width; j++) {
+            if (!puzzle[i][j]) {
+              count += 1;
+            }
+          }
+        }
+        return count;
       },
 
       /**

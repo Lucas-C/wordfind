@@ -22,7 +22,7 @@
     * @param {String} el: The jQuery element to write the puzzle to
     * @param {[[String]]} puzzle: The puzzle to draw
     */
-    var drawPuzzle = function (el, puzzle) {
+    var drawPuzzle = function (el, puzzle, lettersToColor) {
       var output = '';
       // for each row in the puzzle
       for (var i = 0, height = puzzle.length; i < height; i++) {
@@ -31,8 +31,9 @@
         output += '<div>';
         // for each element in that row
         for (var j = 0, width = row.length; j < width; j++) {
+            var isExtraLetter = lettersToColor.some(l => l.i ===i && l.j === j)
             // append our button with the appropriate class
-            output += '<button class="puzzleSquare" x="' + j + '" y="' + i + '">';
+            output += `<button class="puzzleSquare ${isExtraLetter ? 'extra' : ''}" x="` + j + '" y="' + i + '">';
             output += row[j] || '&nbsp;';
             output += '</button>';
         }
@@ -95,7 +96,7 @@
     */
 
     // Game state
-    var startSquare, selectedSquares = [], curOrientation, curWord = '';
+    var startSquare, selectedSquares = [], curOrientation, curWord = '', lettersAddedCount = 0;
 
     /**
     * Event that handles mouse down on a new square. Initializes the game state
@@ -248,10 +249,12 @@
 
     // Class properties, game initial config:
     wordList = getWords().sort();
-    this.puzzle = wordfind.newPuzzle(wordList, options);
+    var result = wordfind.newPuzzle(wordList, options);
+    this.puzzle = result.grid;
+    lettersAddedCount = result.lettersAdded.length
 
     // Draw all of the words
-    drawPuzzle(puzzleEl, this.puzzle);
+    drawPuzzle(puzzleEl, this.puzzle, options.colorFillingLetters ? result.lettersAdded : []);
 
     // attach events to the buttons
     // optimistically add events for windows 8 touch
@@ -293,6 +296,10 @@
           wordEl.addClass('wordFound');
         }
       }
+    };
+
+    this.addedLettersCount = function () {
+      return lettersAddedCount;
     };
   };
 
